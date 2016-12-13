@@ -70,32 +70,46 @@ class RPSGame
     puts "You chose #{self.human.move}. Computer chose #{self.computer.move}."
   end
   
-  def tie?(move1, move2)
-    move1 == move2
+  def tie?
+    self.human.move == self.computer.move
   end
   
   WINS =[["rock", "scissors"], ["scissors", "paper"], ["paper", "rock"]]
   
-  def winner(move1, move2)
-    WINS.include?([move1, move2])
+  def winner_is_human?
+    WINS.include?([self.human.move, self.computer.move])
   end
   
   def display_winner
-    if tie?(self.human.move, self.computer.move)
+    if tie?
       puts "It's a tie!"
-    elsif winner(self.human.move, self.computer.move)
+    elsif winner_is_human?
       puts "You win!"
     else
       puts "Computer wins!"
     end
   end
+
+  def play_again?
+    answer = ''
+    loop do
+      puts "Do you wanna play again?"
+      answer = gets.chomp.downcase
+      break if ["yes", "no"].include?(answer)
+      puts "Invalid answer. Please enter yes/no"
+    end
+    answer == "yes"
+  end
   
   def play
     display_welcome_message
-    human.choose
-    computer.choose
-    display_results
-    display_winner
+    loop do
+      human.choose
+      computer.choose
+      display_results
+      display_winner
+      break unless play_again?
+    end
     display_goodbye_message
   end
 end
