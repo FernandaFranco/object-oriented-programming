@@ -9,57 +9,109 @@
 # display_winner
 
 class Player
-  attr_reader :player_type
-  attr_accessor :move
+  attr_accessor :move, :name
   
-  def initialize(player_type = :human)
-    @player_type = player_type
-    @move = nil
+  def initialize
+    set_name
+  end
+
+end
+
+class Human < Player
+  def set_name
+    n = ""
+    loop do
+      puts "Please enter your name:"
+      n = gets.chomp.capitalize
+      break unless n.empty?
+      puts "No name was entered."
+    end
+    self.name = n
   end
   
   def choose
-    if human?
-      choice = ""
-      loop do 
-        puts "Choose one: Rock, Paper, Scissors"
-        choice = gets.chomp
-        break if ["rock", "paper", "scissors"].include?(choice)
-        puts "Invalid choice"
-      end
-      self.move = choice
-    else
-      self.move = ["rock", "paper", "scissors"].sample
+    choice = ""
+    loop do 
+      puts "Choose one: (rock/paper/scissors)"
+      choice = gets.chomp
+      break if Move::VALUES.include?(choice)
+      puts "Invalid choice. Please enter 'rock', 'paper' or 'scissors'."
     end
+    self.move = Move.new(choice)
+    
+  end
+end
+
+class Computer < Player
+  def set_name
+    self.name = ['Brian', 'Hugo', 'Sarah', 'Bianca'].sample
   end
   
-  def human?
-    self.player_type == :human
+  def choose
+    self.move = Move.new(Move::VALUES.sample)
   end
 end
 
 class Move
-  def initialize
-  end
-end
+  VALUES = %w(rock paper scissors)
 
-class Rule
-  def initialize
+  attr_reader :value
+
+  def initialize(value)
+    @value = value
   end
+
+  def rock?
+    value == 'rock'
+  end
+
+  def paper?
+    value == 'paper'
+  end
+
+  def scissors?
+    value == 'scissors'
+  end
+
+  def >(other_move)
+    if rock?
+      other_move.scissors?
+    elsif paper?
+      other_move.rock?
+    elsif scissors?
+      other_move.paper?
+    end
+  end
+
+  def <(other_move)
+    if rock?
+      other_move.paper?
+    elsif paper?
+      other_move.scissors?
+    elsif scissors?
+      other_move.rock?
+    end
+  end
+
+  def to_s
+    value
+  end
+
 end
 
 class RPSGame
   attr_accessor :human, :computer
   
   def initialize
-    @human = Player.new
-    @computer = Player.new(:computer)
+    @human = Human.new
+    @computer = Computer.new
   end
   
   def compare(move1, move2)
   end
   
   def display_welcome_message
-    puts "Welcome!"
+    puts "Welcome #{self.human.name}! Your opponent's name is #{self.computer.name}."
   end
   
   def display_goodbye_message
@@ -67,36 +119,44 @@ class RPSGame
   end
   
   def display_results
-    puts "You chose #{self.human.move}. Computer chose #{self.computer.move}."
+    puts "#{human.name} chose #{self.human.move}. #{computer.name} chose #{self.computer.move}."
   end
   
-  def tie?
-    self.human.move == self.computer.move
-  end
+  # def tie?
+  #   self.human.move == self.computer.move
+  # end
   
-  WINS =[["rock", "scissors"], ["scissors", "paper"], ["paper", "rock"]]
+  # WINS =[["rock", "scissors"], ["scissors", "paper"], ["paper", "rock"]]
   
-  def winner_is_human?
-    WINS.include?([self.human.move, self.computer.move])
-  end
+  # def winner_is_human?
+  #   WINS.include?([self.human.move, self.computer.move])
+  # end
   
   def display_winner
-    if tie?
-      puts "It's a tie!"
-    elsif winner_is_human?
-      puts "You win!"
+    if human.move > computer.move
+      puts "#{human.name} won!"
+    elsif computer.move > human.move
+      puts "#{computer.name} won!"
     else
-      puts "Computer wins!"
+      puts "It's a tie!"
     end
+
+    # if tie?
+    #   puts "It's a tie!"
+    # elsif winner_is_human?
+    #   puts "#{human.name} wins!"
+    # else
+    #   puts "#{computer.name} wins!"
+    # end
   end
 
   def play_again?
     answer = ''
     loop do
-      puts "Do you wanna play again?"
+      puts "Do you wanna play again? (yes/no)"
       answer = gets.chomp.downcase
       break if ["yes", "no"].include?(answer)
-      puts "Invalid answer. Please enter yes/no"
+      puts "Invalid answer. Please enter 'yes' or 'no'."
     end
     answer == "yes"
   end
