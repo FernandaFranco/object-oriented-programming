@@ -111,7 +111,8 @@ class RPSGame
   end
   
   def display_welcome_message
-    puts "Welcome #{self.human.name}! Your opponent's name is #{self.computer.name}."
+    puts "Welcome #{self.human.name}! Your opponent's name is " \
+         "#{self.computer.name}."
   end
   
   def display_goodbye_message
@@ -119,7 +120,8 @@ class RPSGame
   end
   
   def display_results
-    puts "#{human.name} chose #{self.human.move}. #{computer.name} chose #{self.computer.move}."
+    puts "#{human.name} chose #{self.human.move}. #{computer.name} " \
+          "chose #{self.computer.move}."
   end
   
   # def tie?
