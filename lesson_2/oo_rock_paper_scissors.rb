@@ -9,10 +9,11 @@
 # display_winner
 
 class Player
-  attr_accessor :move, :name
+  attr_accessor :move, :name, :score
 
   def initialize
     set_name
+    @score = 0
   end
 end
 
@@ -104,9 +105,6 @@ class RPSGame
     @computer = Computer.new
   end
 
-  def compare(move1, move2)
-  end
-
   def display_welcome_message
     puts "Welcome #{human.name}! Your opponent's name is " \
          "#{computer.name}."
@@ -117,8 +115,8 @@ class RPSGame
   end
 
   def display_results
-    puts "#{human.name} chose #{human.move}. #{computer.name} " \
-          "chose #{computer.move}."
+    puts "#{human.name} chose #{human.move}. " \
+         "#{computer.name} chose #{computer.move}."
   end
 
   # def tie?
@@ -148,6 +146,19 @@ class RPSGame
     #   puts "#{computer.name} wins!"
     # end
   end
+  
+  def display_score
+    if human.move > computer.move
+      human.score += 1
+    elsif computer.move > human.move
+      computer.score += 1
+    end
+    puts "Score: #{human.name} #{human.score} X #{computer.name} #{computer.score}"
+  end
+  
+  def end_game?
+    human.score == 10 || computer.score == 10
+  end
 
   def play_again?
     answer = ''
@@ -167,6 +178,8 @@ class RPSGame
       computer.choose
       display_results
       display_winner
+      display_score
+      break if end_game?
       break unless play_again?
     end
     display_goodbye_message
