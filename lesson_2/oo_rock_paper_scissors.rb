@@ -97,6 +97,9 @@ class Move
   end
 end
 
+class Score
+end
+
 class RPSGame
   attr_accessor :human, :computer
 
@@ -156,6 +159,14 @@ class RPSGame
     puts "Score: #{human.name} #{human.score} X #{computer.name} #{computer.score}"
   end
   
+  def display_final_winner
+    if human.score > computer.score
+      puts "#{human.name} is the winner! Congratulations!"
+    else
+      puts "#{computer.name} is the winner! better luck next time."
+    end
+  end
+  
   def end_game?
     human.score == 10 || computer.score == 10
   end
@@ -182,6 +193,7 @@ class RPSGame
       break if end_game?
       break unless play_again?
     end
+    display_final_winner
     display_goodbye_message
   end
 end
