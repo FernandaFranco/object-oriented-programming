@@ -27,6 +27,7 @@ class Human < Player
       puts "No name was entered."
     end
     self.name = n
+    
   end
 
   def choose
@@ -50,6 +51,7 @@ class Computer < Player
     self.move = Move.new(Move::VALUES.sample)
   end
 end
+
 
 class Move
   VALUES = %w(rock paper scissors).freeze
@@ -98,6 +100,9 @@ class Move
 end
 
 class Score
+  
+  def initialize(move)
+  end
 end
 
 class RPSGame
