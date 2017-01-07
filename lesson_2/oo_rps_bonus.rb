@@ -1,17 +1,62 @@
 class Score
-  attr_accessor :winner
+  attr_reader :value
 
-  def initialize(winner)
-    @winner = winner
+  def initialize
+    @value = 0
+  end
+  
+  def update_score
+    @value += 1
+  end
+  
+  def to_s
+    value.to_s
   end
 end
 
+class History
+  
+  def initialize
+    @history = []
+  end
+  
+  def update_history(move)
+    @history << move
+  end
+  
+  def to_s
+    @history.join(',')
+  end
+end
+
+# class Rock < Move
+# end
+
+# class Paper < Move
+# end
+
+# class Scissors < Move
+# end
+
+# class Lizard < Move
+# end
+
+# class Spock < Move
+# end
+
 class Move
-  VALUES = %w(rock paper scissors).freeze
+  VALUES = %w(rock paper scissors lizard spock).freeze
 
   WINING_LOSING_PAIRS = [['rock', 'scissors'],
                          ['scissors', 'paper'],
-                         ['paper', 'rock']].freeze
+                         ['paper', 'rock'],
+                         ['rock', 'lizard'],
+                         ['lizard', 'spock'],
+                         ['spock', 'rock'],
+                         ['scissors', 'lizard'],
+                         ['lizard', 'paper'],
+                         ['paper', 'spock'],
+                         ['spock', 'scissors']].freeze
 
   attr_reader :value
 
@@ -29,12 +74,13 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :move, :name, :score, :history
 
   def initialize
     # maybe a "name"? what about a "move"?
     set_name
-    @score = 0
+    @score = Score.new
+    @history = History.new
   end
 end
 
@@ -54,12 +100,14 @@ class Human < Player
   def choose
     choice = nil
     loop do
-      puts "Choose a move: (rock/paper/scissors)"
+      puts "Choose a move: (rock/paper/scissors/lizard/spock)"
       choice = gets.chomp.downcase
       break if Move::VALUES.include?(choice)
-      puts "Invalid choice. Please enter 'rock', 'paper' or 'scissors'."
+      puts "Invalid choice. Please enter 'rock', 'paper', 'scissors', " \
+           "'lizard' or 'spock'."
     end
     self.move = Move.new(choice)
+    self.history.update_history(self.move)
   end
 end
 
@@ -71,6 +119,7 @@ class Computer < Player
   def choose
     choice = Move::VALUES.sample
     self.move = Move.new(choice)
+    self.history.update_history(self.move)
   end
 end
 
@@ -83,7 +132,7 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome to 'Rock, Paper, Scissors', #{human.name}! " \
+    puts "Welcome to 'RPSLS', #{human.name}! " \
          "Your opponent's name is #{computer.name}."
   end
 
@@ -104,6 +153,8 @@ class RPSGame
   def display_choices
     puts "#{human.name} chose #{human.move}. " \
          "#{computer.name} chose #{computer.move}."
+         
+    puts "#{human.history}, #{computer.history}"
   end
 
   def display_winner
@@ -116,8 +167,8 @@ class RPSGame
 
   def display_score
     case winner
-    when :human then human.score += 1
-    when :computer then computer.score += 1
+    when :human then human.score.update_score
+    when :computer then computer.score.update_score
     end
     puts "Score: #{human.name} #{human.score} X " \
          "#{computer.name} #{computer.score}"
