@@ -1,29 +1,34 @@
+def clear_screen
+  system('clear') || system('cls')
+end
+
 class Score
+  END_GAME_SCORE = 3
+
   attr_reader :value
 
   def initialize
     @value = 0
   end
-  
-  def update_score
+
+  def update
     @value += 1
   end
-  
+
   def to_s
     value.to_s
   end
 end
 
 class History
-  
   def initialize
     @history = []
   end
-  
-  def update_history(move)
+
+  def update(move)
     @history << move
   end
-  
+
   def to_s
     @history.join(',')
   end
@@ -88,6 +93,7 @@ class Human < Player
   def set_name
     name = nil
     loop do
+      clear_screen
       puts "What's your name?"
       name = gets.chomp
       break unless name.empty?
@@ -107,20 +113,31 @@ class Human < Player
            "'lizard' or 'spock'."
     end
     self.move = Move.new(choice)
-    self.history.update_history(self.move)
+    history.update(move)
   end
 end
 
 class Computer < Player
   def set_name
-    self.name = %w(C-3PO R2-D2 BB-8).sample
+    self.name = %w(C3po R2d2 Bb8).sample
   end
 
+  # def choose
+  #   choice = Move::VALUES.sample
+  #   self.move = Move.new(choice)
+  #   history.update(move)
+  # end
+  
   def choose
-    choice = Move::VALUES.sample
+    choice = case name
+             when "C3po" then %w(rock rock rock paper spock).sample
+             when "R2d2" then "spock"
+             when "Bb8" then %w(lizard scissors).sample
+             end
     self.move = Move.new(choice)
-    self.history.update_history(self.move)
+    history.update(move)
   end
+  
 end
 
 class RPSGame
@@ -132,7 +149,7 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome to 'RPSLS', #{human.name}! " \
+    puts "Welcome to RPSLS, #{human.name}! " \
          "Your opponent's name is #{computer.name}."
   end
 
@@ -153,8 +170,6 @@ class RPSGame
   def display_choices
     puts "#{human.name} chose #{human.move}. " \
          "#{computer.name} chose #{computer.move}."
-         
-    puts "#{human.history}, #{computer.history}"
   end
 
   def display_winner
@@ -165,49 +180,59 @@ class RPSGame
     end
   end
 
-  def display_score
+  def update_score
     case winner
-    when :human then human.score.update_score
-    when :computer then computer.score.update_score
+    when :human then human.score.update
+    when :computer then computer.score.update
     end
+  end
+
+  def display_score
     puts "Score: #{human.name} #{human.score} X " \
          "#{computer.name} #{computer.score}"
   end
 
   def display_final_winner
-    if human.score > computer.score
+    if human.score.value > computer.score.value
       puts "#{human.name} is the winner! Congratulations!"
+    elsif computer.score.value > human.score.value
+      puts "#{computer.name} is the winner! Better luck next time."
     else
-      puts "#{computer.name} is the winner! better luck next time."
+      puts "It's a tie! Nobody wins."
     end
   end
 
   def end_game?
-    human.score == 3 || computer.score == 3
+    human.score.value == Score::END_GAME_SCORE ||
+      computer.score.value == Score::END_GAME_SCORE
   end
 
   def play_again?
     answer = nil
     loop do
-      puts "Do you want to play again? (yes/no)"
+      puts "Do you want to play again? (y/n)"
       answer = gets.chomp
-      break if ['yes', 'no'].include?(answer)
-      puts "Sorry, invalid answer. Enter 'yes or 'no'."
+      break if ['y', 'n'].include?(answer)
+      puts "Sorry, invalid answer. Enter 'y' for yes or 'n' for no."
     end
 
-    answer == 'yes'
+    answer == 'y'
   end
 
   def play
+    clear_screen
     display_welcome_message
     loop do
       human.choose
       computer.choose
       display_choices
       display_winner
+      update_score
       display_score
       break if end_game?
       break unless play_again?
+      clear_screen
+      display_score
     end
     display_final_winner
     display_goodbye_message
