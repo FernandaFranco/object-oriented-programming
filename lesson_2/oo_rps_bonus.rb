@@ -1,4 +1,9 @@
 class Score
+  attr_accessor :winner
+
+  def initialize(winner)
+    @winner = winner
+  end
 end
 
 class Move
@@ -24,11 +29,12 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name
+  attr_accessor :move, :name, :score
 
   def initialize
     # maybe a "name"? what about a "move"?
     set_name
+    @score = 0
   end
 end
 
@@ -108,6 +114,27 @@ class RPSGame
     end
   end
 
+  def display_score
+    case winner
+    when :human then human.score += 1
+    when :computer then computer.score += 1
+    end
+    puts "Score: #{human.name} #{human.score} X " \
+         "#{computer.name} #{computer.score}"
+  end
+
+  def display_final_winner
+    if human.score > computer.score
+      puts "#{human.name} is the winner! Congratulations!"
+    else
+      puts "#{computer.name} is the winner! better luck next time."
+    end
+  end
+
+  def end_game?
+    human.score == 3 || computer.score == 3
+  end
+
   def play_again?
     answer = nil
     loop do
@@ -127,8 +154,11 @@ class RPSGame
       computer.choose
       display_choices
       display_winner
+      display_score
+      break if end_game?
       break unless play_again?
     end
+    display_final_winner
     display_goodbye_message
   end
 end

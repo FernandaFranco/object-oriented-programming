@@ -1,3 +1,5 @@
+
+
 # in this game, the user enter his/her choice, the computer randomly selects its
 # move, the choices are compared and displayed and the winner is displayed.
 
@@ -171,6 +173,7 @@ class RPSGame
       puts "#{computer.name} is the winner! better luck next time."
     end
   end
+  
   
   def end_game?
     human.score == 10 || computer.score == 10
