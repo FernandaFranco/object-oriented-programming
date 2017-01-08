@@ -21,16 +21,18 @@ class Score
 end
 
 class History
+  attr_reader :moves
+
   def initialize
-    @history = []
+    @moves = []
   end
 
   def update(move)
-    @history << move
+    @moves << move
   end
 
   def to_s
-    @history.join(',')
+    @moves.join(', ')
   end
 end
 
@@ -82,7 +84,6 @@ class Player
   attr_accessor :move, :name, :score, :history
 
   def initialize
-    # maybe a "name"? what about a "move"?
     set_name
     @score = Score.new
     @history = History.new
@@ -119,7 +120,7 @@ end
 
 class Computer < Player
   def set_name
-    self.name = %w(C3po R2d2 Bb8).sample
+    self.name = %w(C-3PO R2-D2 BB-8).sample
   end
 
   # def choose
@@ -128,16 +129,19 @@ class Computer < Player
   #   history.update(move)
   # end
   
+  def strategic_move
+   
+  end
+
   def choose
     choice = case name
-             when "C3po" then %w(rock rock rock paper spock).sample
-             when "R2d2" then "spock"
-             when "Bb8" then %w(lizard scissors).sample
+             when "C-3PO" then %w(rock rock rock paper spock).sample
+             when "R2-D2" then %w(lizard scissors).sample
+             when "BB-8" then strategic_move
              end
     self.move = Move.new(choice)
     history.update(move)
   end
-  
 end
 
 class RPSGame
@@ -146,6 +150,7 @@ class RPSGame
   def initialize
     @human = Human.new
     @computer = Computer.new
+    @history = []
   end
 
   def display_welcome_message
@@ -157,6 +162,16 @@ class RPSGame
     puts "Good-bye!"
   end
 
+  def display_history
+    puts "#{human.name}'s past move(s): #{human.history}."
+    puts "#{computer.name}'s past move(s): #{computer.history}."
+  end
+
+  def display_choices
+    puts "#{human.name} chose #{human.move}. " \
+         "#{computer.name} chose #{computer.move}."
+  end
+  
   def winner
     if human.move > computer.move
       :human
@@ -165,11 +180,6 @@ class RPSGame
     else
       :tie
     end
-  end
-
-  def display_choices
-    puts "#{human.name} chose #{human.move}. " \
-         "#{computer.name} chose #{computer.move}."
   end
 
   def display_winner
@@ -190,6 +200,11 @@ class RPSGame
   def display_score
     puts "Score: #{human.name} #{human.score} X " \
          "#{computer.name} #{computer.score}"
+  end
+  
+  def game_history
+    @history << [computer.move.value, winner]
+    p @history
   end
 
   def display_final_winner
@@ -229,10 +244,12 @@ class RPSGame
       display_winner
       update_score
       display_score
+      game_history
       break if end_game?
       break unless play_again?
       clear_screen
       display_score
+      display_history
     end
     display_final_winner
     display_goodbye_message
