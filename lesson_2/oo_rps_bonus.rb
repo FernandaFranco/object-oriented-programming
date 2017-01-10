@@ -24,32 +24,17 @@ class History
   attr_reader :moves
 
   def initialize
-    @moves = []
+    @rounds = {}
   end
 
-  def update(move)
-    @moves << move
+  def update(winner, human_move, computer_move)
+    @rounds[winner] = [human_move, computer_move]
   end
-
+  
   def to_s
-    @moves.join(', ')
+    @rounds.to_s
   end
 end
-
-# class Rock < Move
-# end
-
-# class Paper < Move
-# end
-
-# class Scissors < Move
-# end
-
-# class Lizard < Move
-# end
-
-# class Spock < Move
-# end
 
 class Move
   VALUES = %w(rock paper scissors lizard spock).freeze
@@ -114,7 +99,6 @@ class Human < Player
            "'lizard' or 'spock'."
     end
     self.move = Move.new(choice)
-    history.update(move)
   end
 end
 
@@ -140,17 +124,17 @@ class Computer < Player
              when "BB-8" then strategic_move
              end
     self.move = Move.new(choice)
-    history.update(move)
   end
 end
 
 class RPSGame
-  attr_accessor :human, :computer
+  attr_accessor :human, :computer, :score, :history
 
   def initialize
     @human = Human.new
     @computer = Computer.new
-    @history = []
+    @score = Score.new
+    @history = History.new
   end
 
   def display_welcome_message
@@ -163,8 +147,8 @@ class RPSGame
   end
 
   def display_history
-    puts "#{human.name}'s past move(s): #{human.history}."
-    puts "#{computer.name}'s past move(s): #{computer.history}."
+    puts "#{human.name}'s past move(s): #{history}."
+    puts "#{computer.name}'s past move(s): #{history}."
   end
 
   def display_choices
@@ -201,11 +185,6 @@ class RPSGame
     puts "Score: #{human.name} #{human.score} X " \
          "#{computer.name} #{computer.score}"
   end
-  
-  def game_history
-    @history << [computer.move.value, winner]
-    p @history
-  end
 
   def display_final_winner
     if human.score.value > computer.score.value
@@ -241,10 +220,10 @@ class RPSGame
       human.choose
       computer.choose
       display_choices
+      history.update(winner, human.move, computer.move)
       display_winner
-      update_score
+      score.update
       display_score
-      game_history
       break if end_game?
       break unless play_again?
       clear_screen
