@@ -13,26 +13,33 @@
 # square
 
 
+
 class Player
   WINING_SETS = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                 [1, 4, 7], [2, 5, 8], [3, 6, 9],
                 [1, 5, 9], [3, 5, 7]]
 
   attr_reader :marker
-  attr_accessor :marks
+  attr_accessor :marked_keys
 
   def initialize
-    @marks = []
+    reset
   end
 
   def won?
     WINING_SETS.each do |set|
-      if marks.include?(set[0]) && marks.include?(set[1]) && marks.include?(set[2])
+      if marked_keys.include?(set[0]) &&
+         marked_keys.include?(set[1]) &&
+         marked_keys.include?(set[2])
         return true
       end
     end
 
     false
+  end
+
+  def reset
+    @marked_keys = []
   end
 end
 
@@ -58,10 +65,9 @@ class Human < Player
         puts "Sorry, invalid input."
       end
     end
+    board[key] = marker
 
-    board.set_square_at(key, marker)
-
-    marks << key
+    marked_keys << key
   end
 end
 
@@ -75,9 +81,9 @@ class Computer < Player
 
   def move(board)
     key = board.unmarked_keys.sample
-    board.set_square_at(key, marker)
+    board[key] = marker
 
-    marks << key
+    marked_keys << key
   end
 end
 
@@ -85,14 +91,24 @@ class Board
 
   def initialize
     @squares = {}
-    (1..9).each {|key| @squares[key] = Square.new}
+    reset
   end
 
-  def get_square_at(key)
-    @squares[key]
+  def draw
+    puts "     |     |     "
+    puts "  #{@squares[1]}  |  #{@squares[2]}  |  #{@squares[3]}"
+    puts "     |     |     "
+    puts "-----+-----+-----"
+    puts "     |     |     "
+    puts "  #{@squares[4]}  |  #{@squares[5]}  |  #{@squares[6]}"
+    puts "     |     |     "
+    puts "-----+-----+-----"
+    puts "     |     |     "
+    puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
+    puts "     |     |     "
   end
 
-  def set_square_at(key, marker)
+  def []=(key, marker)
     @squares[key].marker = marker
   end
 
@@ -104,10 +120,10 @@ class Board
     unmarked_keys.empty?
   end
 
-
+  def reset
+    (1..9).each {|key| @squares[key] = Square.new}
+  end
 end
-
-  
 
 class Square
   INITIAL_MARKER = ' '
@@ -136,7 +152,13 @@ class TTTGame
     @computer = Computer.new
   end
 
+  def clear
+    system('clear')
+    system('clc')
+  end
+
   def display_welcome_message
+    clear
     puts "Welcome to Tic Tac Toe!"
   end
 
@@ -145,26 +167,17 @@ class TTTGame
   end
 
   def display_board
-    system('clear')
-    display_welcome_message
-
     puts "You are a '#{human.marker}'. Computer is a '#{computer.marker}'."
     puts ""
-    puts "     |     |     "
-    puts "  #{board.get_square_at(1)}  |  #{board.get_square_at(2)}  |  #{board.
-    get_square_at(3)}  "
-    puts "     |     |     "
-    puts "-----+-----+-----"
-    puts "     |     |     "
-    puts "  #{board.get_square_at(4)}  |  #{board.get_square_at(5)}  |  #{board.
-    get_square_at(6)}  "
-    puts "     |     |     "
-    puts "-----+-----+-----"
-    puts "     |     |     "
-    puts "  #{board.get_square_at(7)}  |  #{board.get_square_at(8)}  |  #{board.
-    get_square_at(9)}  "
-    puts "     |     |     "
+    board.draw
     puts ""
+  end
+
+  def clear_screen_and_display_board
+    clear
+    puts ''
+
+    display_board
   end
 
   def someone_won?
@@ -172,7 +185,7 @@ class TTTGame
   end
 
   def display_result
-    display_board
+    clear_screen_and_display_board
 
     if human.won?
       puts "Congratulations! You're the winner!"
@@ -183,23 +196,50 @@ class TTTGame
     end
   end
 
-  def play
-    display_board
+  def play_again?
+    answer = nil
 
     loop do
-      
-      human.move(board)
-      # break if board.full?
-      break if someone_won? || board.full?
-
-      computer.move(board)
-      display_board
-      # break if board.full?
-      break if someone_won? || board.full?
- 
+      puts "Would you like to play again? (y/n)"
+      answer = gets.chomp.downcase
+      break if %w(y n).include?(answer)
+      puts "Sorry, invalid input."
     end
 
-    display_result
+    answer == 'y'
+  end
+
+  def reset
+    board.reset
+    human.reset
+    computer.reset
+    clear
+  end
+
+  def display_play_again_message
+    puts "Let's play again!"
+  end
+
+  def play
+    display_welcome_message
+    loop do
+      display_board
+
+      loop do
+        human.move(board)
+        break if someone_won? || board.full?
+
+        computer.move(board)
+        clear_screen_and_display_board
+        break if someone_won? || board.full?
+      end
+
+      display_result
+      break unless play_again?
+      reset
+      display_play_again_message
+    end
+
     display_goodbye_message
   end
 end
