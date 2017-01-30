@@ -145,12 +145,45 @@ end
 
 class TTTGame
   attr_reader :board, :human, :computer
+  attr_accessor :turn
+
+  FIRST_TO_MOVE = Human::HUMAN_MARKER
 
   def initialize
     @board = Board.new
     @human = Human.new
     @computer = Computer.new
+    @turn = FIRST_TO_MOVE
   end
+
+  def play
+    display_welcome_message
+    loop do
+      display_board
+
+      loop do
+        current_player_moves
+        clear_screen_and_display_board if human_turn?
+        break if someone_won? || board.full?
+
+        # human.move(board)
+        # break if someone_won? || board.full?
+
+        # computer.move(board)
+        # clear_screen_and_display_board
+        # break if someone_won? || board.full?
+      end
+
+      display_result
+      break unless play_again?
+      reset
+      display_play_again_message
+    end
+
+    display_goodbye_message
+  end
+
+  private
 
   def clear
     system('clear')
@@ -167,7 +200,7 @@ class TTTGame
   end
 
   def display_board
-    puts "You are a '#{human.marker}'. Computer is a '#{computer.marker}'."
+    puts "You are '#{human.marker}'. Computer is '#{computer.marker}'."
     puts ""
     board.draw
     puts ""
@@ -213,6 +246,7 @@ class TTTGame
     board.reset
     human.reset
     computer.reset
+    self.turn = FIRST_TO_MOVE
     clear
   end
 
@@ -220,27 +254,18 @@ class TTTGame
     puts "Let's play again!"
   end
 
-  def play
-    display_welcome_message
-    loop do
-      display_board
+  def human_turn?
+    turn == Human::HUMAN_MARKER
+  end
 
-      loop do
-        human.move(board)
-        break if someone_won? || board.full?
-
-        computer.move(board)
-        clear_screen_and_display_board
-        break if someone_won? || board.full?
-      end
-
-      display_result
-      break unless play_again?
-      reset
-      display_play_again_message
+  def current_player_moves
+    if human_turn?
+      human.move(board)
+      self.turn = Computer::COMPUTER_MARKER
+    else
+      computer.move(board)
+      self.turn = Human::HUMAN_MARKER
     end
-
-    display_goodbye_message
   end
 end
 
