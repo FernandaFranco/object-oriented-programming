@@ -1,8 +1,8 @@
 class Array
   def joinor(sep = ', ', last_sep = 'or')
-    case self.size
-    when 2 then "#{self.join(" #{last_sep} ")}"
-    when 1 then "#{self[0]}"
+    case size
+    when 2 then join(" #{last_sep} ").to_s
+    when 1 then self[0].to_s
     else
       "#{self[0...-1].join(sep)} #{last_sep} #{self[-1]}"
     end
@@ -32,9 +32,6 @@ class Player
     end
 
     false
-  end
-
-  def at_risk?(other_player)
   end
 
   def reset
@@ -80,7 +77,50 @@ class Computer < Player
   end
 
   def move(board)
-    key = board.unmarked_keys.sample
+    if board.unmarked_keys.include?(5)
+      key = 5
+    else
+      key = board.unmarked_keys.sample
+    end
+
+    WINING_SETS.each do |set|
+      if board.marked_by_human_keys.include?(set[0]) &&
+         board.marked_by_human_keys.include?(set[1]) &&
+         board.unmarked_keys.include?(set[2])
+        key = set[2]
+        break
+      elsif board.marked_by_human_keys.include?(set[0]) &&
+            board.marked_by_human_keys.include?(set[2]) &&
+            board.unmarked_keys.include?(set[1])
+        key = set[1]
+        break
+      elsif board.marked_by_human_keys.include?(set[1]) &&
+            board.marked_by_human_keys.include?(set[2]) &&
+            board.unmarked_keys.include?(set[0])
+        key = set[0]
+        break
+      end
+    end
+
+    WINING_SETS.each do |set|
+      if marked_keys.include?(set[0]) &&
+         marked_keys.include?(set[1]) &&
+         board.unmarked_keys.include?(set[2])
+        key = set[2]
+        break
+      elsif marked_keys.include?(set[0]) &&
+            marked_keys.include?(set[2]) &&
+            board.unmarked_keys.include?(set[1])
+        key = set[1]
+        break
+      elsif marked_keys.include?(set[1]) &&
+            marked_keys.include?(set[2]) &&
+            board.unmarked_keys.include?(set[0])
+        key = set[0]
+        break
+      end
+    end
+
     board[key] = marker
 
     marked_keys << key
@@ -117,6 +157,14 @@ class Board
     @squares.keys.select { |key| @squares[key].unmarked? }
   end
 
+  def marked_by_human_keys
+    @squares.keys.select { |key| @squares[key].marked_by_human? }
+  end
+
+  def marked_by_computer_keys
+    @squares.keys.select { |key| @squares[key].marker_by_computer? }
+  end
+
   def full?
     unmarked_keys.empty?
   end
@@ -137,6 +185,14 @@ class Square
 
   def unmarked?
     marker == INITIAL_MARKER
+  end
+
+  def marked_by_human?
+    marker == Human::HUMAN_MARKER
+  end
+
+  def marker_by_computer?
+    marker == Computer::COMPUTER_MARKER
   end
 
   def to_s
