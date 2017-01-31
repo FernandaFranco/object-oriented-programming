@@ -40,7 +40,6 @@ class Player
 end
 
 class Human < Player
-
   HUMAN_MARKER = "X".freeze
 
   def initialize
@@ -77,48 +76,24 @@ class Computer < Player
   end
 
   def move(board)
+    key = nil
+
+    WINING_SETS.each do |set|
+      if marked_keys.count { |k| set.include?(k) } == 2
+        key ||= set.select { |k| board.unmarked_keys.include?(k) }.first
+      end
+    end
+
+    WINING_SETS.each do |set|
+      if board.marked_by_human_keys.count { |k| set.include?(k) } == 2
+        key ||= set.select { |k| board.unmarked_keys.include?(k) }.first
+      end
+    end
+
     if board.unmarked_keys.include?(5)
-      key = 5
+      key ||= 5
     else
-      key = board.unmarked_keys.sample
-    end
-
-    WINING_SETS.each do |set|
-      if board.marked_by_human_keys.include?(set[0]) &&
-         board.marked_by_human_keys.include?(set[1]) &&
-         board.unmarked_keys.include?(set[2])
-        key = set[2]
-        break
-      elsif board.marked_by_human_keys.include?(set[0]) &&
-            board.marked_by_human_keys.include?(set[2]) &&
-            board.unmarked_keys.include?(set[1])
-        key = set[1]
-        break
-      elsif board.marked_by_human_keys.include?(set[1]) &&
-            board.marked_by_human_keys.include?(set[2]) &&
-            board.unmarked_keys.include?(set[0])
-        key = set[0]
-        break
-      end
-    end
-
-    WINING_SETS.each do |set|
-      if marked_keys.include?(set[0]) &&
-         marked_keys.include?(set[1]) &&
-         board.unmarked_keys.include?(set[2])
-        key = set[2]
-        break
-      elsif marked_keys.include?(set[0]) &&
-            marked_keys.include?(set[2]) &&
-            board.unmarked_keys.include?(set[1])
-        key = set[1]
-        break
-      elsif marked_keys.include?(set[1]) &&
-            marked_keys.include?(set[2]) &&
-            board.unmarked_keys.include?(set[0])
-        key = set[0]
-        break
-      end
+      key ||= board.unmarked_keys.sample
     end
 
     board[key] = marker
