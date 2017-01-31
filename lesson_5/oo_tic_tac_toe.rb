@@ -12,12 +12,10 @@
 
 # square
 
-
-
 class Player
   WINING_SETS = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
-                [1, 4, 7], [2, 5, 8], [3, 6, 9],
-                [1, 5, 9], [3, 5, 7]]
+                 [1, 4, 7], [2, 5, 8], [3, 6, 9],
+                 [1, 5, 9], [3, 5, 7]].freeze
 
   attr_reader :marker
   attr_accessor :marked_keys
@@ -44,7 +42,7 @@ class Player
 end
 
 class Human < Player
-  HUMAN_MARKER = "X"
+  HUMAN_MARKER = "X".freeze
 
   def initialize
     super
@@ -55,11 +53,11 @@ class Human < Player
     key = nil
 
     loop do
-      puts "Choose a square (#{board.unmarked_keys.join(", ")}):"
+      puts "Choose a square (#{board.unmarked_keys.join(', ')}):"
       key = gets.chomp.to_i
       if board.unmarked_keys.include?(key)
         break
-      elsif (1..9).include?(key)
+      elsif (1..9).cover?(key)
         puts "Sorry, the square has already been marked."
       else
         puts "Sorry, invalid input."
@@ -72,7 +70,7 @@ class Human < Player
 end
 
 class Computer < Player
-  COMPUTER_MARKER = "O"
+  COMPUTER_MARKER = "O".freeze
 
   def initialize
     super
@@ -88,12 +86,12 @@ class Computer < Player
 end
 
 class Board
-
   def initialize
     @squares = {}
     reset
   end
 
+  # rubocop:disable Metrics/AbcSize
   def draw
     puts "     |     |     "
     puts "  #{@squares[1]}  |  #{@squares[2]}  |  #{@squares[3]}"
@@ -107,6 +105,7 @@ class Board
     puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
     puts "     |     |     "
   end
+  # rubocop:enable Metrics/AbcSize
 
   def []=(key, marker)
     @squares[key].marker = marker
@@ -121,12 +120,12 @@ class Board
   end
 
   def reset
-    (1..9).each {|key| @squares[key] = Square.new}
+    (1..9).each { |key| @squares[key] = Square.new }
   end
 end
 
 class Square
-  INITIAL_MARKER = ' '
+  INITIAL_MARKER = ' '.freeze
 
   attr_accessor :marker
 
@@ -144,10 +143,10 @@ class Square
 end
 
 class TTTGame
+  FIRST_TO_MOVE = Human::HUMAN_MARKER
+
   attr_reader :board, :human, :computer
   attr_accessor :turn
-
-  FIRST_TO_MOVE = Human::HUMAN_MARKER
 
   def initialize
     @board = Board.new
