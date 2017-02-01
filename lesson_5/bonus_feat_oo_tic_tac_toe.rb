@@ -75,6 +75,9 @@ class Computer < Player
     @marker = COMPUTER_MARKER
   end
 
+  def offensive_move(board)
+  end
+
   def move(board)
     key = nil
 
