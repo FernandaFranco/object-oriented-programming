@@ -75,22 +75,27 @@ class Computer < Player
     @marker = COMPUTER_MARKER
   end
 
-  def offensive_move(board)
+  def try_offensive_move(set, board)
+    if marked_keys.count { |k| set.include?(k) } == 2
+      set.select { |k| board.unmarked_keys.include?(k) }.first
+    end
+  end
+
+  def try_defensive_move(set, board)
+    if board.marked_by_human_keys.count { |k| set.include?(k) } == 2
+      set.select { |k| board.unmarked_keys.include?(k) }.first
+    end
   end
 
   def move(board)
     key = nil
 
     WINING_SETS.each do |set|
-      if marked_keys.count { |k| set.include?(k) } == 2
-        key ||= set.select { |k| board.unmarked_keys.include?(k) }.first
-      end
+      key ||=  try_offensive_move(set, board)
     end
 
     WINING_SETS.each do |set|
-      if board.marked_by_human_keys.count { |k| set.include?(k) } == 2
-        key ||= set.select { |k| board.unmarked_keys.include?(k) }.first
-      end
+      key ||= try_defensive_move(set, board)
     end
 
     if board.unmarked_keys.include?(5)
