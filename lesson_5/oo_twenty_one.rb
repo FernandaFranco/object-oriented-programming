@@ -26,13 +26,21 @@ module Hand
   end
 
   def total
+    @total = 0
+
+    cards.each do |card|
+      @total += card.value.to_i
+      puts card.value.to_i
+    end
+
+    @total
   end
 end
 
 class Participant
   include Hand
 
-  attr_accessor :cards
+  attr_accessor :cards, :total
 
   def initialize
   end
@@ -50,6 +58,8 @@ end
 class Card
   SUITS = %w(hearts diamonds clubs spades)
   VALUES = %w(2 3 4 5 6 7 8 9 10 jack queen king ace)
+
+  attr_reader :value, :suit
 
   def initialize(value, suit)
     @value = value
@@ -83,14 +93,23 @@ class Game
   end
 
   def deal_cards
-    p player.cards = deck.cards.sample(2)
+    player.cards = deck.cards.sample(2)
     deck.cards.delete(player.cards[0])
     deck.cards.delete(player.cards[1])
-    p dealer.cards =  deck.cards.sample(2)
+    dealer.cards =  deck.cards.sample(2)
     deck.cards.delete(dealer.cards[0])
     deck.cards.delete(dealer.cards[1])
+  end
 
-    p deck.cards.size
+  def show_initial_cards
+    puts "Your cards are:"
+    puts " - #{player.cards[0].value} of #{player.cards[0].suit}"
+    puts " - #{player.cards[1].value} of #{player.cards[1].suit}"
+    puts "You have a total of #{player.total}."
+    puts ""
+    puts "The dealer cards are:"
+    puts " - #{dealer.cards[0].value} of #{dealer.cards[0].suit}"
+    puts " - unknown"
   end
 
   def start
