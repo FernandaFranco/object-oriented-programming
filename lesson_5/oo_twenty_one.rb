@@ -1,9 +1,8 @@
 # description: twenty-one is a game with a dealer and a player where the goal is
-# to get closer to 21 with the sum of the values of the cards in your hand
-# without busting. Both with 2 cards. A player can hit until he makes 21 or
-# stay, yielding the turn to the dealer. The dealer has to keep hitting until he
-# makes 17 or surpass it. Whoever gets closer to 21 without busting is the
-# winner.
+# to get closer to 21 with the sum of the cards in your hand without busting.
+# Both with 2 cards. A player can hit until he makes 21 or stay, yielding the
+# turn to the dealer. The dealer has to keep hitting until he makes 17 or
+# surpass it. Whoever gets closer to 21 without busting is the winner.
 
 # dealer
 # player
@@ -17,14 +16,18 @@
 # deal
 
 module Hand
-  def hit
-    puts "#{name} chose to hit."
+  def show_cards
     puts "#{name}'s cards are:"
     cards.each do |card|
-      puts " - #{card.value} of #{card.suit}"
+      puts " - #{card}"
     end
     puts "#{name} has a total of #{total}."
     puts "#{name} busted!" if busted?
+  end
+
+  def hit
+    puts "#{name} chose to hit."
+    show_cards
   end
 
   def stay
@@ -39,8 +42,8 @@ module Hand
     @total = 0
     aces = 0
     cards.each do |card|
-      @total += card.actual_value
-      aces += 1 if card.value == "ace"
+      @total += card.value
+      aces += 1 if card.face == "ace"
     end
 
     aces.times do
@@ -78,24 +81,28 @@ end
 
 class Card
   SUITS = %w(hearts diamonds clubs spades).freeze
-  VALUES = %w(2 3 4 5 6 7 8 9 10 jack queen king ace).freeze
+  FACES = %w(2 3 4 5 6 7 8 9 10 jack queen king ace).freeze
 
-  attr_reader :value, :suit, :actual_value
+  attr_reader :face, :suit, :value
 
-  def initialize(value, suit)
-    @value = value
+  def initialize(face, suit)
+    @face = face
     @suit = suit
-    set_actual_value
+    set_value
   end
 
-  def set_actual_value
-    @actual_value = case value
-                    when value.to_i.to_s then value.to_i
-                    when "jack"          then 10
-                    when "queen"         then 10
-                    when "king"          then 10
-                    when "ace"           then 11
-                    end
+  def set_value
+    @value = case face
+             when face.to_i.to_s then face.to_i
+             when "jack"          then 10
+             when "queen"         then 10
+             when "king"          then 10
+             when "ace"           then 11
+             end
+  end
+
+  def to_s
+    "#{face} of #{suit}"
   end
 end
 
@@ -107,8 +114,8 @@ class Deck
   end
 
   def set_deck
-    value_suit_pairs = Card::VALUES.product(Card::SUITS)
-    value_suit_pairs.each do |pair|
+    face_suit_pairs = Card::FACES.product(Card::SUITS)
+    face_suit_pairs.each do |pair|
       @cards << Card.new(*pair)
     end
   end
@@ -124,41 +131,38 @@ class Game
   end
 
   def deal_cards
-    player.cards = deck.cards.sample(2)
-    deck.cards.delete(player.cards[0])
-    deck.cards.delete(player.cards[1])
-    dealer.cards = deck.cards.sample(2)
-    deck.cards.delete(dealer.cards[0])
-    deck.cards.delete(dealer.cards[1])
+    deck.cards.shuffle!
+    player.cards = deck.cards.pop(2)
+    dealer.cards = deck.cards.pop(2)
   end
 
   def show_initial_cards
-    puts "Player's cards are:"
-    puts " - #{player.cards[0].value} of #{player.cards[0].suit}"
-    puts " - #{player.cards[1].value} of #{player.cards[1].suit}"
-    puts "Player has a total of #{player.total}."
-    puts ""
+    player.show_cards
+    puts "---"
     puts "Dealer's cards are:"
-    puts " - #{dealer.cards[0].value} of #{dealer.cards[0].suit}"
+    puts " - #{dealer.cards.first}"
     puts " - unknown card"
-    puts "Dealer has a total of #{dealer.cards[0].actual_value} + ?"
+    puts "Dealer has a total of #{dealer.cards.first.value} + ?"
+  end
+
+  def player_hits?
+    answer = nil
+    puts "Would you like to hit or stay? (h/s)"
+    loop do
+      answer = gets.chomp.downcase
+      break if %w(h s).include?(answer)
+      puts "Sorry, invalid answer. Type h to hit or s to stay:"
+    end
+    clear
+
+    answer == 'h'
   end
 
   def player_turn
-    answer = nil
     loop do
-      puts "Would you like to hit or stay? (h/s)"
-      loop do
-        answer = gets.chomp.downcase
-        break if %w(h s).include?(answer)
-        puts "Sorry, invalid answer. Type h to hit or s to stay:"
-      end
-
-      clear
-      if answer == 'h'
-        player.cards << deck.cards.sample
+      if player_hits?
+        player.cards << deck.cards.pop
         player.hit
-        deck.cards.delete(player.cards[-1])
       else
         player.stay
         break
@@ -175,9 +179,8 @@ class Game
         dealer.stay
         break
       else
-        dealer.cards << deck.cards.sample
+        dealer.cards << deck.cards.pop
         dealer.hit
-        deck.cards.delete(dealer.cards[-1])
       end
     end
   end
