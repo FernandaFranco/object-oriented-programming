@@ -1,20 +1,3 @@
-# description: twenty-one is a game with a dealer and a player where the goal is
-# to get closer to 21 with the sum of the cards in your hand without busting.
-# Both with 2 cards. A player can hit until he makes 21 or stay, yielding the
-# turn to the dealer. The dealer has to keep hitting until he makes 17 or
-# surpass it. Whoever gets closer to 21 without busting is the winner.
-
-# dealer
-# player
-# game
-# deck
-# card
-
-# hit
-# stay
-# bust
-# deal
-
 module Hand
   def show_cards
     puts "#{name}'s cards are:"
